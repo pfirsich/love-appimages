@@ -7,6 +7,8 @@ import re
 import shutil
 from urllib.request import urlretrieve
 
+tested_versions = ["11.3", "0.10.2", "0.9.2"]
+
 ldd_regex = re.compile(r"^.* => (.*) \(0x[a-fA-F0-9]+\)$")
 
 wrapper = """#!/bin/sh
@@ -22,21 +24,35 @@ fi
 
 def get_libs(binary_path):
     libs = []
+    ignored = []
     res = subprocess.run(["ldd", binary_path], capture_output=True)
     for line in res.stdout.decode("utf-8").splitlines():
         m = ldd_regex.match(line.strip())
         if m:
             libs.append(m.group(1))
         else:
+            ignored.append(line)
             print("Ignoring lib: {}".format(line.strip()))
-    return libs
+    return libs, ignored
+
+
+def get_liblove_name(ignored_libs):
+    matches = [lib for lib in ignored_libs if "liblove" in lib]
+    if len(matches) == 0:
+        sys.exit("Did not find library dependence on liblove (what)")
+    elif len(matches) > 1:
+        sys.exit("Found multiple dependencies on liblove (what): {}".format(matches))
+    return matches[0].strip().split()[0]
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    tested_versions_str = ", ".join(tested_versions)
+    parser = argparse.ArgumentParser(
+        description="Currently tested with versions: {}".format(tested_versions_str)
+    )
     parser.add_argument("lovedirectory", help="The root of the love repo you built in")
     parser.add_argument("appdir", help="The output AppDir directory")
-    parser.add_argument("--appimage", help="Create an AppImage too.")
+    parser.add_argument("--appimage", help="Create an AppImage too")
     args = parser.parse_args()
 
     if not path.isdir(args.lovedirectory):
@@ -44,7 +60,8 @@ def main():
     lovedir = lambda x: path.join(args.lovedirectory, x)
 
     love_exe_path = lovedir("src/.libs/love")
-    liblove_so_path = lovedir("src/.libs/liblove.so.0.0.0")
+    # liblove.so is actually a symlink to some .so file with a name that varies by löve version
+    liblove_so_path = lovedir("src/.libs/liblove.so")
 
     if not path.isfile(love_exe_path):
         sys.exit(
@@ -52,7 +69,7 @@ def main():
         )
     if not path.isfile(liblove_so_path):
         sys.exit(
-            "Could not find src/.libs/liblove.so.0.0.0. You built an unsupported version or not at all."
+            "Could not find src/.libs/liblove.so.0. You built an unsupported version or not at all."
         )
 
     if path.isdir(args.appdir):
@@ -65,7 +82,7 @@ def main():
     os.makedirs(appdir("usr/lib"), exist_ok=True)
 
     shutil.copy2(love_exe_path, appdir("usr/bin"))
-    shutil.copy2(liblove_so_path, appdir("usr/lib/liblove.so.0"))
+    shutil.copy2(liblove_so_path, appdir("usr/lib/liblove.so"))
     shutil.copy2(lovedir("platform/unix/love.svg"), appdir("."))
     shutil.copy2(lovedir("license.txt"), appdir("."))
 
@@ -90,14 +107,19 @@ def main():
         f.write(love_desktop_sub)
 
     print("Copying libs..")
-    libs = []
-    libs.extend(get_libs(love_exe_path))
-    libs.extend(get_libs(liblove_so_path))
+    love_libs, love_libs_ignored = get_libs(love_exe_path)
+    liblove_libs, _liblove_libs_ignored = get_libs(liblove_so_path)
+    libs = love_libs + liblove_libs
+    # TODO: Filter out some libs, because it's too much right now
 
     for lib in libs:
         target = path.join(args.appdir, lib[1:])  # [1:] to strip leading slash
         os.makedirs(path.dirname(target), exist_ok=True)
         shutil.copy2(lib, target)
+
+    liblove_symlink_name = get_liblove_name(love_libs_ignored)
+    print("Creating symlink '{}'".format(liblove_symlink_name))
+    os.symlink("liblove.so", appdir("usr/lib/" + liblove_symlink_name))
 
     if args.appimage != None:
         appimagetool = shutil.which("appimagetool")
