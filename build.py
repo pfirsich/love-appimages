@@ -25,7 +25,9 @@ fi
 def get_libs(binary_path):
     libs = []
     ignored = []
-    res = subprocess.run(["ldd", binary_path], capture_output=True)
+    res = subprocess.run(
+        ["ldd", binary_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
     for line in res.stdout.decode("utf-8").splitlines():
         m = ldd_regex.match(line.strip())
         if m:
@@ -46,7 +48,11 @@ def get_liblove_name(ignored_libs):
 
 
 def strip_object(src_path, dst_path):
-    res = subprocess.run(["strip", "-s", "-o", dst_path, src_path], capture_output=True)
+    res = subprocess.run(
+        ["strip", "-s", "-o", dst_path, src_path],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     if res.returncode != 0:
         sys.exit(
             "Could not strip object '{}':\n{}".format(
@@ -137,7 +143,9 @@ def main():
             sys.exit("To create an AppImage you need appimagetool in your PATH!")
         print("Building AppImage")
         res = subprocess.run(
-            [appimagetool, args.appdir, args.appimage], capture_output=True
+            [appimagetool, args.appdir, args.appimage],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         if res.returncode != 0:
             sys.exit(
