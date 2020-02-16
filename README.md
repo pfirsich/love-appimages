@@ -11,6 +11,8 @@ The [Releases](https://github.com/pfirsich/love-appimages/releases) page provide
 ## Creating an AppImage of Your Game from a löve AppImage
 You can use this if you want to: [makelove](https://github.com/pfirsich/makelove) (coming in the next few days if not already there)
 
+Please note that you will only be able to follow these steps if you are using Linux. This will also not work on WSL, because of a lack of FUSE support and therefore a lack of support for AppImages altogether.
+
 With my AppImages your game will run in fused mode, if it's run from inside an AppImage. If you do not want this, edit `usr/bin/wrapper-love`.
 
 Unless your game relies on a bug, you can pick the latest major release your game was made for (e.g. if your game was made for version 0.10.1, pick 0.10.2). Then be lucky and find the AppImage for that version on the [Releases](https://github.com/pfirsich/love-appimages/releases) page and download it.
