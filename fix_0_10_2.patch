@@ -1,6 +1,3 @@
-diff --git a/platform/unix/love.6 b/platform/unix/love.6
-old mode 100644
-new mode 100755
 diff --git a/src/libraries/luasocket/libluasocket/auxiliar.c b/src/libraries/luasocket/libluasocket/auxiliar.c
 index 95149701..cb00e7b4 100644
 --- a/src/libraries/luasocket/libluasocket/auxiliar.c
