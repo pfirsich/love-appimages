@@ -45,6 +45,16 @@ def get_liblove_name(ignored_libs):
     return matches[0].strip().split()[0]
 
 
+def strip_object(src_path, dst_path):
+    res = subprocess.run(["strip", "-s", "-o", dst_path, src_path], capture_output=True)
+    if res.returncode != 0:
+        sys.exit(
+            "Could not strip object '{}':\n{}".format(
+                src_path, res.stderr.decode("utf-8")
+            )
+        )
+
+
 def main():
     tested_versions_str = ", ".join(tested_versions)
     parser = argparse.ArgumentParser(
@@ -81,8 +91,8 @@ def main():
     os.makedirs(appdir("usr/bin"), exist_ok=True)
     os.makedirs(appdir("usr/lib"), exist_ok=True)
 
-    shutil.copy2(love_exe_path, appdir("usr/bin"))
-    shutil.copy2(liblove_so_path, appdir("usr/lib/liblove.so"))
+    strip_object(love_exe_path, appdir("usr/bin/love"))
+    strip_object(liblove_so_path, appdir("usr/lib/liblove.so"))
     shutil.copy2(lovedir("platform/unix/love.svg"), appdir("."))
     shutil.copy2(lovedir("license.txt"), appdir("."))
 
