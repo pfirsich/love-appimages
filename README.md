@@ -2,7 +2,7 @@
 
 I made this, because there are no official AppImages for versions before löve 11 and because I think even those are somewhat complicated (the love script in the root is unnecessary, because AppRun already does it), they could make packaging games with them a tiny bit easier and parameters are not handled correctly (e.g. `./love.AppImage --fused mygame.love` will not work).
 
-My approach in gathering the shared libraries is not very clever. I just blindly include everything ldd identifies as a dependency. I would be glad if someone could help me clean this up competently. But considering some other sources of AppImages (such as [polyamory](https://github.com/megagrump/polyamory), which is otherwise really awesome) provide incomplete ones, I do not mind having mine be 20-30MB bigger and give people trouble less often, when the whole point of AppImages is to not give people trouble because of missing libraries.
+My approach in gathering the shared libraries is not very clever. I just blindly include everything ldd identifies as a dependency. I would be glad if someone could help me clean this up competently. But considering some other sources of AppImages (such as [polyamory](https://github.com/megagrump/polyamory), which is otherwise really awesome) provide incomplete ones, I do not mind having mine be ~5MB bigger and give people trouble less often, when the whole point of AppImages is to not give people trouble because of missing libraries.
 
 I also wanted to automate the process (so everyone could do it) and implicitely document it that way, which is done through the [build.py](build.py) script, which you can point to a löve repository after a successful build (see the bottom of this README on notes on building older versions).
 
