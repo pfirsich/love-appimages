@@ -11,6 +11,38 @@ tested_versions = ["11.3", "0.10.2", "0.9.2"]
 
 ldd_regex = re.compile(r"^.* => (.*) \(0x[a-fA-F0-9]+\)$")
 
+# https://github.com/AppImage/pkg2appimage/blob/master/excludelist
+# https://discourse.appimage.org/t/will-a-new-appimage-run-on-older-distributions/84/3
+# We assume that among other libs glibc and libstdc++ are installed on the user's system
+# But those libraries should be backwards compatible, so you should build löve on,
+# as the comment says "the oldest system you are targeting"
+lib_whitelist = [
+    "libluajit-5.1",
+    "libmodplug",
+    "libSDL2-2.0",
+    "libatomic",
+    "libfreetype",
+    "libmpg123",
+    "libogg",
+    "libopenal",
+    "libtheoradec",
+    "libvorbis",
+    "libvorbisfile",
+    "libgcc_s",
+    "libpng12",
+    "libz",
+    "libsndio",
+    "libpng16",
+    "libmng",  # 0.9.2
+    "libjpg",  # 0.9.2
+    "libtiff",  # 0.9.2
+    "libIL",  # 0.9.2
+    "libphysfs",  # 0.9.2
+    "libwebp",  # 0.9.2
+    "libjbig",  # 0.9.2
+    "libjpeg",  # 0.9.2
+]
+
 wrapper = """#!/bin/sh
 cd "$OWD"
 love_files=$(find $APPDIR/usr/bin -type f -name "*.love")
@@ -125,10 +157,20 @@ def main():
     print("Copying libs..")
     love_libs, love_libs_ignored = get_libs(love_exe_path)
     liblove_libs, _liblove_libs_ignored = get_libs(liblove_so_path)
-    libs = love_libs + liblove_libs
-    # TODO: Filter out some libs, because it's too much right now
+    all_libs = love_libs + liblove_libs
+    filtered_libs = list(
+        filter(
+            lambda l: any(path.basename(l).startswith(w + ".") for w in lib_whitelist),
+            all_libs,
+        )
+    )
+    for lib in filtered_libs:
+        print("Including:", lib)
+    for lib in all_libs:
+        if not lib in filtered_libs:
+            print("Excluded by filter:", lib)
 
-    for lib in libs:
+    for lib in filtered_libs:
         target = path.join(args.appdir, lib[1:])  # [1:] to strip leading slash
         os.makedirs(path.dirname(target), exist_ok=True)
         shutil.copy2(lib, target)
