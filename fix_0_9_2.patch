@@ -1,0 +1,242 @@
+diff --git a/src/libraries/luasocket/libluasocket/auxiliar.c b/src/libraries/luasocket/libluasocket/auxiliar.c
+index 95149701..cb00e7b4 100644
+--- a/src/libraries/luasocket/libluasocket/auxiliar.c
++++ b/src/libraries/luasocket/libluasocket/auxiliar.c
+@@ -24,7 +24,7 @@ int auxiliar_open(lua_State *L) {
+ * Creates a new class with given methods
+ * Methods whose names start with __ are passed directly to the metatable.
+ \*-------------------------------------------------------------------------*/
+-void auxiliar_newclass(lua_State *L, const char *classname, luaL_reg *func) {
++void auxiliar_newclass(lua_State *L, const char *classname, luaL_Reg *func) {
+     luaL_newmetatable(L, classname); /* mt */
+     /* create __index table to place methods */
+     lua_pushstring(L, "__index");    /* mt,"__index" */
+diff --git a/src/libraries/luasocket/libluasocket/auxiliar.h b/src/libraries/luasocket/libluasocket/auxiliar.h
+index 18b84955..a4df9ebc 100644
+--- a/src/libraries/luasocket/libluasocket/auxiliar.h
++++ b/src/libraries/luasocket/libluasocket/auxiliar.h
+@@ -35,7 +35,7 @@
+ #include "lauxlib.h"
+ 
+ int auxiliar_open(lua_State *L);
+-void auxiliar_newclass(lua_State *L, const char *classname, luaL_reg *func);
++void auxiliar_newclass(lua_State *L, const char *classname, luaL_Reg *func);
+ void auxiliar_add2group(lua_State *L, const char *classname, const char *group);
+ void auxiliar_setclass(lua_State *L, const char *classname, int objidx);
+ void *auxiliar_checkclass(lua_State *L, const char *classname, int objidx);
+diff --git a/src/libraries/luasocket/libluasocket/except.c b/src/libraries/luasocket/libluasocket/except.c
+index 5faa5be0..97c00a36 100644
+--- a/src/libraries/luasocket/libluasocket/except.c
++++ b/src/libraries/luasocket/libluasocket/except.c
+@@ -21,7 +21,7 @@ static int finalize(lua_State *L);
+ static int do_nothing(lua_State *L);
+ 
+ /* except functions */
+-static luaL_reg func[] = {
++static luaL_Reg func[] = {
+     {"newtry",    global_newtry},
+     {"protect",   global_protect},
+     {NULL,        NULL}
+diff --git a/src/libraries/luasocket/libluasocket/inet.c b/src/libraries/luasocket/libluasocket/inet.c
+index f2cddeea..7c34707e 100644
+--- a/src/libraries/luasocket/libluasocket/inet.c
++++ b/src/libraries/luasocket/libluasocket/inet.c
+@@ -21,7 +21,7 @@ static void inet_pushresolved(lua_State *L, struct hostent *hp);
+ static int inet_global_gethostname(lua_State *L);
+ 
+ /* DNS functions */
+-static luaL_reg func[] = {
++static luaL_Reg func[] = {
+     { "toip", inet_global_toip },
+     { "tohostname", inet_global_tohostname },
+     { "gethostname", inet_global_gethostname},
+diff --git a/src/libraries/luasocket/libluasocket/lua.h b/src/libraries/luasocket/libluasocket/lua.h
+index a280df84..8731dcf6 100644
+--- a/src/libraries/luasocket/libluasocket/lua.h
++++ b/src/libraries/luasocket/libluasocket/lua.h
+@@ -7,7 +7,7 @@
+ #include <lauxlib.h>
+ 
+ #if LUA_VERSION_NUM > 501
+-#	define luaL_reg luaL_Reg
++#	define luaL_Reg luaL_Reg
+ #	define luaL_putchar(B, c) luaL_addchar(B, c)
+ #	define luaL_typerror(L, n, t) luax_typerror(L, n, t)
+ 
+diff --git a/src/libraries/luasocket/libluasocket/luasocket.c b/src/libraries/luasocket/libluasocket/luasocket.c
+index 0d10bb1d..3b8a7c4d 100644
+--- a/src/libraries/luasocket/libluasocket/luasocket.c
++++ b/src/libraries/luasocket/libluasocket/luasocket.c
+@@ -47,7 +47,7 @@ static int base_open(lua_State *L);
+ /*-------------------------------------------------------------------------*\
+ * Modules and functions
+ \*-------------------------------------------------------------------------*/
+-static const luaL_reg mod[] = {
++static const luaL_Reg mod[] = {
+     {"auxiliar", auxiliar_open},
+     {"except", except_open},
+     {"timeout", timeout_open},
+@@ -59,7 +59,7 @@ static const luaL_reg mod[] = {
+     {NULL, NULL}
+ };
+ 
+-static luaL_reg func[] = {
++static luaL_Reg func[] = {
+     {"skip",      global_skip},
+     {"__unload",  global_unload},
+     {NULL,        NULL}
+diff --git a/src/libraries/luasocket/libluasocket/mime.c b/src/libraries/luasocket/libluasocket/mime.c
+index 700fa05e..8e31a3cf 100644
+--- a/src/libraries/luasocket/libluasocket/mime.c
++++ b/src/libraries/luasocket/libluasocket/mime.c
+@@ -48,7 +48,7 @@ static size_t qpencode(UC c, UC *input, size_t size,
+ static size_t qppad(UC *input, size_t size, luaL_Buffer *buffer);
+ 
+ /* code support functions */
+-static luaL_reg func[] = {
++static luaL_Reg func[] = {
+     { "dot", mime_global_dot },
+     { "b64", mime_global_b64 },
+     { "eol", mime_global_eol },
+diff --git a/src/libraries/luasocket/libluasocket/select.c b/src/libraries/luasocket/libluasocket/select.c
+index d70f6627..6071e7ae 100644
+--- a/src/libraries/luasocket/libluasocket/select.c
++++ b/src/libraries/luasocket/libluasocket/select.c
+@@ -27,7 +27,7 @@ static void make_assoc(lua_State *L, int tab);
+ static int global_select(lua_State *L);
+ 
+ /* functions in library namespace */
+-static luaL_reg func[] = {
++static luaL_Reg func[] = {
+     {"select", global_select},
+     {NULL,     NULL}
+ };
+diff --git a/src/libraries/luasocket/libluasocket/tcp.c b/src/libraries/luasocket/libluasocket/tcp.c
+index 6b8a79b4..af21ca30 100644
+--- a/src/libraries/luasocket/libluasocket/tcp.c
++++ b/src/libraries/luasocket/libluasocket/tcp.c
+@@ -38,7 +38,7 @@ static int meth_setfd(lua_State *L);
+ static int meth_dirty(lua_State *L);
+ 
+ /* tcp object methods */
+-static luaL_reg tcp[] = {
++static luaL_Reg tcp[] = {
+     {"__gc",        meth_close},
+     {"__tostring",  auxiliar_tostring},
+     {"accept",      meth_accept},
+@@ -73,7 +73,7 @@ static t_opt opt[] = {
+ };
+ 
+ /* functions in library namespace */
+-static luaL_reg func[] = {
++static luaL_Reg func[] = {
+     {"tcp", global_create},
+     {NULL, NULL}
+ };
+diff --git a/src/libraries/luasocket/libluasocket/timeout.c b/src/libraries/luasocket/libluasocket/timeout.c
+index c1df1021..19b01392 100644
+--- a/src/libraries/luasocket/libluasocket/timeout.c
++++ b/src/libraries/luasocket/libluasocket/timeout.c
+@@ -33,7 +33,7 @@
+ static int timeout_lua_gettime(lua_State *L);
+ static int timeout_lua_sleep(lua_State *L);
+ 
+-static luaL_reg func[] = {
++static luaL_Reg func[] = {
+     { "gettime", timeout_lua_gettime },
+     { "sleep", timeout_lua_sleep },
+     { NULL, NULL }
+diff --git a/src/libraries/luasocket/libluasocket/udp.c b/src/libraries/luasocket/libluasocket/udp.c
+index fc25aa02..720a8c64 100644
+--- a/src/libraries/luasocket/libluasocket/udp.c
++++ b/src/libraries/luasocket/libluasocket/udp.c
+@@ -43,7 +43,7 @@ static int meth_setfd(lua_State *L);
+ static int meth_dirty(lua_State *L);
+ 
+ /* udp object methods */
+-static luaL_reg udp[] = {
++static luaL_Reg udp[] = {
+     {"__gc",        meth_close},
+     {"__tostring",  auxiliar_tostring},
+     {"close",       meth_close},
+@@ -76,7 +76,7 @@ static t_opt opt[] = {
+ };
+ 
+ /* functions in library namespace */
+-static luaL_reg func[] = {
++static luaL_Reg func[] = {
+     {"udp", global_create},
+     {NULL, NULL}
+ };
+diff --git a/src/libraries/luasocket/libluasocket/unix.c b/src/libraries/luasocket/libluasocket/unix.c
+index 158d319a..96074ff2 100644
+--- a/src/libraries/luasocket/libluasocket/unix.c
++++ b/src/libraries/luasocket/libluasocket/unix.c
+@@ -39,7 +39,7 @@ static const char *unix_tryconnect(p_unix un, const char *path);
+ static const char *unix_trybind(p_unix un, const char *path);
+ 
+ /* unix object methods */
+-static luaL_reg un[] = {
++static luaL_Reg un[] = {
+     {"__gc",        meth_close},
+     {"__tostring",  auxiliar_tostring},
+     {"accept",      meth_accept},
+@@ -71,7 +71,7 @@ static t_opt opt[] = {
+ };
+ 
+ /* our socket creation function */
+-static luaL_reg func[] = {
++static luaL_Reg func[] = {
+     {"unix", global_create},
+     {NULL,          NULL}
+ };
+diff --git a/src/modules/graphics/opengl/Graphics.cpp b/src/modules/graphics/opengl/Graphics.cpp
+index a95f0472..354ffcb5 100644
+--- a/src/modules/graphics/opengl/Graphics.cpp
++++ b/src/modules/graphics/opengl/Graphics.cpp
+@@ -314,6 +314,7 @@ static void APIENTRY debugCB(GLenum source, GLenum type, GLuint id, GLenum sever
+ 
+ void Graphics::setDebug(bool enable)
+ {
++#if 0
+ 	// Make sure debug output is supported. The AMD ext. is a bit different
+ 	// so we don't make use of it, since AMD drivers now support KHR_debug.
+ 	if (!(GLEE_VERSION_4_3 || GLEE_KHR_debug || GLEE_ARB_debug_output))
+@@ -354,6 +355,7 @@ void Graphics::setDebug(bool enable)
+ 		glEnable(GL_DEBUG_OUTPUT);
+ 
+ 	::printf("OpenGL debug output enabled (LOVE_GRAPHICS_DEBUG=1)\n");
++#endif
+ }
+ 
+ void Graphics::reset()
+diff --git a/src/modules/graphics/opengl/OpenGL.cpp b/src/modules/graphics/opengl/OpenGL.cpp
+index cc38b6c4..ab21ff3c 100644
+--- a/src/modules/graphics/opengl/OpenGL.cpp
++++ b/src/modules/graphics/opengl/OpenGL.cpp
+@@ -173,25 +173,11 @@ void OpenGL::initOpenGLFunctions()
+ 	// functions, if the latter isn't supported but the former is.
+ 	if (GLEE_VERSION_1_5 && !GLEE_ARB_vertex_buffer_object)
+ 	{
+-		glBindBufferARB = (GLEEPFNGLBINDBUFFERARBPROC) glBindBuffer;
+-		glBufferDataARB = (GLEEPFNGLBUFFERDATAARBPROC) glBufferData;
+-		glBufferSubDataARB = (GLEEPFNGLBUFFERSUBDATAARBPROC) glBufferSubData;
+-		glDeleteBuffersARB = (GLEEPFNGLDELETEBUFFERSARBPROC) glDeleteBuffers;
+-		glGenBuffersARB = (GLEEPFNGLGENBUFFERSARBPROC) glGenBuffers;
+-		glGetBufferParameterivARB = (GLEEPFNGLGETBUFFERPARAMETERIVARBPROC) glGetBufferParameteriv;
+-		glGetBufferPointervARB = (GLEEPFNGLGETBUFFERPOINTERVARBPROC) glGetBufferPointerv;
+-		glGetBufferSubDataARB = (GLEEPFNGLGETBUFFERSUBDATAARBPROC) glGetBufferSubData;
+-		glIsBufferARB = (GLEEPFNGLISBUFFERARBPROC) glIsBuffer;
+-		glMapBufferARB = (GLEEPFNGLMAPBUFFERARBPROC) glMapBuffer;
+-		glUnmapBufferARB = (GLEEPFNGLUNMAPBUFFERARBPROC) glUnmapBuffer;
+ 	}
+ 
+ 	// Same deal for compressed textures.
+ 	if (GLEE_VERSION_1_3 && !GLEE_ARB_texture_compression)
+ 	{
+-		glCompressedTexImage2DARB = (GLEEPFNGLCOMPRESSEDTEXIMAGE2DARBPROC) glCompressedTexImage2D;
+-		glCompressedTexSubImage2DARB = (GLEEPFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC) glCompressedTexSubImage2D;
+-		glGetCompressedTexImageARB = (GLEEPFNGLGETCOMPRESSEDTEXIMAGEARBPROC) glGetCompressedTexImage;
+ 	}
+ }
+ 
