@@ -186,9 +186,12 @@ def main():
     os.symlink("liblove.so", appdir("usr/lib/" + liblove_symlink_name))
 
     if args.appimage != None:
-        appimagetool = shutil.which("appimagetool")
-        if appimagetool == None:
-            sys.exit("To create an AppImage you need appimagetool in your PATH!")
+        if path.isfile("appimagetool"):
+            appimagetool = "./appimagetool"
+        else:
+            appimagetool = shutil.which("appimagetool")
+            if appimagetool == None:
+                sys.exit("To create an AppImage you need appimagetool in your current working directory or in PATH!")
         print("Building AppImage")
         res = subprocess.run(
             [appimagetool, args.appdir, args.appimage],
