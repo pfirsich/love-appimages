@@ -100,16 +100,22 @@ def main():
     )
     parser.add_argument("lovedirectory", help="The root of the love repo you built in")
     parser.add_argument("appdir", help="The output AppDir directory")
+    parser.add_argument("--builddirectory", help="The build directory relative to the love repo, in case it's not the repo root already")
     parser.add_argument("--appimage", help="Create an AppImage too")
     args = parser.parse_args()
 
     if not path.isdir(args.lovedirectory):
         sys.exit("Love directory does not exist.")
-    lovedir = lambda x: path.join(args.lovedirectory, x)
 
-    love_exe_path = lovedir("src/.libs/love")
+    lovedir = lambda x: path.join(args.lovedirectory, x)
+    if args.builddirectory:
+        builddir = lambda x: path.join(args.lovedirectory, args.builddirectory, x)
+    else:
+        builddir = lovedir
+
+    love_exe_path = builddir("src/.libs/love")
     # liblove.so is actually a symlink to some .so file with a name that varies by löve version
-    liblove_so_path = lovedir("src/.libs/liblove.so")
+    liblove_so_path = builddir("src/.libs/liblove.so")
 
     if not path.isfile(love_exe_path):
         sys.exit(
