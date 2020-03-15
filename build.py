@@ -152,7 +152,7 @@ def main():
     os.chmod(apprun_path, 0o755)
 
     print("Building love.desktop")
-    with open(lovedir("platform/unix/love.desktop")) as f:
+    with open(lovedir("platform/unix/love.desktop.in")) as f:
         love_desktop = f.read()
     love_desktop_sub = re.sub(r"Exec=.*\n", "Exec=wrapper-love %F\n", love_desktop)
     if love_desktop == love_desktop_sub:
